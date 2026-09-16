@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Background Video Example</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Glass Shatter Overlay -->
+  <div class="glass-layer" id="glassLayer"></div>
+ 
+  <div class="prompt" id="prompt">
+    <div class="prompt-ring" id="clickTarget">
+      <span>Click</span>
+    </div>
+    <div class="prompt-label">to break in</div>
+  </div>
+
+  <!-- Background Video Container -->
+  <div class="video-container">
+    <!-- Removed 'autoplay' so video stays paused initially -->
+    <video loop muted playsinline id="bg-video">
+        <source src="edit.mp4" type="video/mp4">
+        Your browser does not support HTML5 video.
+    </video>
+    
+    <!-- Optional overlay to darken the video slightly for better text readability -->
+    <div class="video-overlay"></div>
+  </div>
+
+  <!-- Your Webpage Content -->
+  <div class="content" id="worldInner">
+      <h1>Welcome to My Website</h1>
+      <p>The doors of cinema are open</p>
+      <a href="cinema1.html" class="btn">TAP HERE</a>
+  </div>
+
+  <script>
+    const glassLayer = document.getElementById('glassLayer');
+    const clickTarget = document.getElementById('clickTarget');
+    const prompt = document.getElementById('prompt');
+    const worldInner = document.getElementById('worldInner');
+    const video = document.getElementById('bg-video');
+
+    const COLS = 12;
+    const ROWS = 8;
+    const shards = [];
+    let isShattered = false;
+
+    function buildShards() {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      const cw = w / COLS;
+      const ch = h / ROWS;
+
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          const shard = document.createElement('div');
+          shard.className = 'shard';
+          const jx = (Math.random() - 0.5) * cw * 0.15;
+          const jy = (Math.random() - 0.5) * ch * 0.15;
+          const left = c * cw + jx;
+          const top = r * ch + jy;
+          shard.style.left = left + 'px';
+          shard.style.top = top + 'px';
+          shard.style.width = cw + 1 + 'px';
+          shard.style.height = ch + 1 + 'px';
+          glassLayer.appendChild(shard);
+          shards.push({ el: shard, cx: left + cw / 2, cy: top + ch / 2 });
+        }
+      }
+    }
+
+    buildShards();
+
+    function shatter(originX, originY) {
+      if (isShattered) return;
+      isShattered = true;
+
+      // Reset video to the beginning, unmute, and start playing
+      video.currentTime = 0;
+      video.muted = false;
+      video.play().catch(err => console.log("Autoplay issue:", err));
+
+      prompt.classList.add('hide');
+
+      const withDist = shards.map(s => {
+        const dx = s.cx - originX;
+        const dy = s.cy - originY;
+        return { ...s, dist: Math.sqrt(dx * dx + dy * dy), dx, dy };
+      }).sort((a, b) => a.dist - b.dist);
+
+      const maxDist = Math.max(...withDist.map(s => s.dist)) || 1;
+
+      withDist.forEach((s) => {
+        const delay = (s.dist / maxDist) * 260;
+        const angle = Math.atan2(s.dy, s.dx);
+        const force = 500 + Math.random() * 500;
+        const tx = Math.cos(angle) * force;
+        const ty = Math.sin(angle) * force - 120;
+        const rot = (Math.random() - 0.5) * 720;
+
+        setTimeout(() => {
+          s.el.style.transform = `translate(${tx}px, ${ty}px) rotate(${rot}deg) scale(0.3)`;
+          s.el.style.opacity = '0';
+        }, delay);
+      });
+
+      setTimeout(() => {
+        glassLayer.style.pointerEvents = 'none';
+        glassLayer.remove();
+        worldInner.classList.add('show');
+      }, 1200);
+    }
+
+    // Break glass triggers
+    clickTarget.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const rect = clickTarget.getBoundingClientRect();
+      shatter(rect.left + rect.width / 2, rect.top + rect.height / 2);
+    });
+
+    glassLayer.addEventListener('click', (e) => {
+      shatter(e.clientX, e.clientY);
+    });
+
+    // Toggle play/pause on click AFTER shatter
+    document.addEventListener('click', (e) => {
+      if (!isShattered) return;
+      if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON') return;
+
+      if (video.paused) {
+        video.play();
+      } else {
+        video.pause();
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      if (document.body.contains(glassLayer)) {
+        glassLayer.innerHTML = '';
+        shards.length = 0;
+        buildShards();
+      }
+    });
+  </script>
+
+</body>
+</html>

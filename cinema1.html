@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cinephile Booking Hub </title>
+  <script src="script.js"></script>
+  <style>    
+    
+ div.scrollmenu {
+  background-color: #333;
+  overflow: auto;
+  white-space: nowrap;
+}
+
+div.scrollmenu  {
+  display: inline-block;
+  color: white;
+  text-align: center;
+  padding: 14px;
+  text-decoration: none;
+}
+
+
+  /* =========================================================
+       1. THEME VARIABLES & GLOBAL STYLES
+       ========================================================= */
+    :root {
+      --bg-dark: #000000;
+      --card-bg: rgba(255, 255, 255, 0.04);
+      --glass-border: rgba(255, 255, 255, 0.12);
+      --accent-gold: #ffb703;
+      --gold-glow: rgba(255, 183, 3, 0.35);
+      --accent-blue: #00f0ff;
+      --blue-glow: rgba(0, 240, 255, 0.35);
+      --accent-red: #ff2a5f;
+      --red-glow: rgba(255, 42, 95, 0.35);
+      --text-main: #f8f9fa;
+      --text-muted: #9ea3b0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #000000;
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      padding: 3rem 1.5rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+      background-image: none;
+      background-attachment: fixed;
+    }
+
+    /* Vignette Overlay */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      box-shadow: inset 0 0 120px rgba(0, 0, 0, 0.85);
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    /* =========================================================
+       2. ANIMATIONS
+       ========================================================= */
+    @keyframes projectorPowerOn {
+      0% { opacity: 0; transform: translateX(-50%) scaleY(0); }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; transform: translateX(-50%) scaleY(1); }
+    }
+
+    @keyframes heroFadeIn {
+      from { opacity: 0; transform: translateY(-20px); filter: blur(10px); }
+      to { opacity: 1; transform: translateY(0); filter: blur(0); }
+    }
+
+    @keyframes cardReveal {
+      from { opacity: 0; transform: translateY(40px) scale(0.95); filter: blur(5px); }
+      to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+    }
+
+    @keyframes ambientPulse {
+      0%, 100% { opacity: 0.15; }
+      50% { opacity: 0.3; }
+    }
+
+    @keyframes confetti-float {
+      0% { background-position: 0 0; }
+      100% { background-position: 0 -60px; }
+    }
+
+    /* =========================================================
+       3. HEADER & PROJECTOR BEAM
+       ========================================================= */
+    header {
+      text-align: center;
+      margin-bottom: 3.5rem;
+      position: relative;
+    }
+
+    header::before {
+      content: '';
+      position: absolute;
+      top: -3rem;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 320px;
+      height: 140px;
+      background: linear-gradient(180deg, rgba(230, 0, 35, 0.5) 0%, transparent 100%);
+      clip-path: polygon(40% 0, 60% 0, 100% 100%, 0% 100%);
+      pointer-events: none;
+      filter: blur(10px);
+      transform-origin: top center;
+      animation: projectorPowerOn 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    header h1, header p, .section-title {
+      animation: heroFadeIn 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    header h1 {
+      font-size: 2.5rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      background: linear-gradient(180deg, #ffffff 30%, #a5a5a5 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.8));
+      font-weight: 800;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 1rem;
+      margin-top: 0.5rem;
+      letter-spacing: 1px;
+    }
+
+    .section-title {
+      font-size: 1.3rem;
+      color:#ffd700;
+      border-left: 4px solid #ffd700;
+       padding-left: 0.8rem;
+      margin-bottom: 1.5rem;
+      color: var(--accent-gold);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-weight: 700;
+    }
+
+    .section-title.single-screens {
+      color: #ff3366;
+      border-left: 4px solid #ff3366;
+      padding-left: 0.8rem;
+    }
+
+    /* =========================================================
+       4. GRID & CARDS
+       ========================================================= */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-bottom: 3rem;
+    }
+
+      .card {
+
+      position: relative;
+
+      background: rgba(18, 20, 29, 0.65);
+
+      backdrop-filter: blur(12px);
+
+      border-radius: 16px;
+
+      padding: 1.6rem;
+
+      border: 1px solid rgba(255, 255, 255, 0.08);
+
+      transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+
+      display: flex;
+
+      flex-direction: column;
+
+      justify-content: space-between;
+
+      overflow: hidden;
+
+      animation: cardReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+
+    }
+
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      filter: blur(50px);
+      opacity: 0.15;
+      transition: opacity 0.35s ease;
+      pointer-events: none;
+      animation: ambientPulse 4s ease-in-out infinite;
+    }
+
+    .card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+    }
+
+    .card:hover::before {
+      opacity: 0.35;
+    }
+
+    .card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -150%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+      transform: skewX(-25deg);
+      transition: left 0.75s ease;
+      pointer-events: none;
+    }
+
+    .card:hover::after {
+      left: 150%;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.8rem;
+    }
+
+    .theater-name {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.2;
+    }
+
+    .location {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 1.8rem;
+    }
+
+    .badge {
+      height: auto;             /* Allows the badge height to grow with the text */
+  white-space: normal;       /* Allows text wrapping */
+  word-break: break-word;
+    
+      font-size: 0.7rem;
+      font-weight: 800;
+      padding: 0.25rem 0.6rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      background: rgba(0, 0, 0, 0.4);
+      width: max-content;        /* Forces the badge to match the text width */
+  max-width: none;   
+      white-space: nowrap;
+      overflow: visible;  
+    }
+
+    .book-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      width: 100%;
+      padding: 0.8rem 1rem;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      text-decoration: none;
+      color: #ffffff;
+      font-weight: 600;
+      font-size: 0.85rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .book-btn:hover {
+      background: rgba(255, 255, 255, 0.18);
+      border-color: rgba(255, 255, 255, 0.4);
+      color: #ffffff;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+    }
+
+
+
+    /* Screen Theme Accents */
+    .card.theme-imax { border-top: 3px solid var(--accent-gold); }
+    .card.theme-imax::before { background: var(--accent-gold); }
+    .card.theme-imax .badge.imax { color: var(--accent-gold); border: 1px solid var(--accent-gold); box-shadow: 0 0 10px var(--gold-glow); }
+
+    .card.theme-pcx { border-top: 3px solid var(--accent-red); }
+    .card.theme-pcx::before { background: var(--accent-red); }
+    .card.theme-pcx .badge { color: var(--accent-red); border: 1px solid var(--accent-red); box-shadow: 0 0 10px var(--red-glow); }
+
+    .card.theme-dolby { border-top: 3px solid var(--accent-blue); }
+    .card.theme-dolby::before { background: var(--accent-blue); }
+    .card.theme-dolby .badge { color: var(--accent-blue); border: 1px solid var(--accent-blue); box-shadow: 0 0 10px var(--blue-glow); }
+
+    .card.theme-dolby-cinema { border-top: 3px solid #2563eb; }
+    .card.theme-dolby-cinema .badge { color: #3b82f6; border: 1px solid #3b82f6; box-shadow: 0 0 10px rgba(59, 130, 246, 0.5); }
+
+    .card.theme-cinepolis { border-top: 3px solid #104994; }
+    .card.theme-cinepolis::before { background: #6bbaef; }
+    .card.theme-cinepolis .badge { color: #6bbaef; border: 1px solid #6bbaef; box-shadow: 0 0 10px rgba(107, 186, 239, 0.4); }
+
+    .card.theme-epiq { border-top: 3px solid #00ff66; }
+    .card.theme-epiq::before { background: #00ff66; }
+    .card.theme-epiq .badge { color: #00ff66; border: 1px solid #00ff66; box-shadow: 0 0 10px rgba(0, 255, 102, 0.4); }
+
+    .card.theme-aaa { border-top: 3px solid #b026ff; }
+    .card.theme-aaa::before { background: #b026ff; }
+    .card.theme-aaa .badge { color: #b026ff; border: 1px solid #b026ff; box-shadow: 0 0 10px rgba(176, 38, 255, 0.4); }
+
+    /* =========================================================
+       5. WATCHLIST & POSTER CARDS
+       ========================================================= */
+    .poster-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1.8rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .movie-card {
+      background: var(--card-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      overflow: hidden;
+      backdrop-filter: blur(12px);
+      display: flex;
+      flex-direction: column;
+      transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    /* HOVER EFFECT: Bright Gold Border & Neon Gold Outer Glow */
+    .movie-card:hover {
+      transform: translateY(-6px);
+      border-color: #ffb703;
+      box-shadow: 0 0 20px #ffb703, 
+                  0 0 40px rgba(255, 183, 3, 0.6);
+    }
+
+    .poster-wrapper {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 2 / 3;
+      background: #12131a;
+      overflow: hidden;
+    }
+
+    .poster-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s ease;
+    }
+
+    .movie-card:hover .poster-img {
+      transform: scale(1.05);
+    }
+
+    .format-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(0, 0, 0, 0.75);
+      border: 1px solid var(--accent-gold);
+      color: var(--accent-gold);
+      font-size: 0.65rem;
+      font-weight: 800;
+      padding: 0.25rem 0.5rem;
+      border-radius: 6px;
+      letter-spacing: 1px;
+      backdrop-filter: blur(4px);
+    }
+
+    .movie-info {
+      padding: 1.2rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      flex-grow: 1;
+      gap: 0.8rem;
+    }
+
+    .movie-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      line-height: 1.3;
+      color: var(--text-main);
+    }
+
+    .release-date {
+      font-size: 0.8rem;
+      color: var(--accent-gold);
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.4rem;
+    }
+
+    .btn-action {
+      flex: 1;
+      text-align: center;
+      padding: 0.6rem 0.4rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-decoration: none;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      transition: all 0.2s ease;
+    }
+
+    .btn-action:hover {
+      background: rgba(255, 183, 3, 0.2);
+      border-color: #ffb703;
+      color: #ffb703;
+    }
+
+    /* Single Screens Dynamic Variations */
+    .card.single-screen {
+      background: #0d0a12;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-top: 3px solid var(--single-accent, #ff0055);
+    }
+
+    .card.single-screen:hover {
+      border-color: var(--single-accent, #ff0055);
+      box-shadow: 0 8px 24px -6px var(--single-glow, rgba(255, 0, 85, 0.25));
+    }
+    .card.single-screen::before {
+      background-image: 
+        radial-gradient(circle at 20% 30%, var(--single-accent, #ff0055) 1px, transparent 2px),
+        radial-gradient(circle at 80% 20%, #ffffff 1.5px, transparent 2px);
+      background-size: 60px 60px;
+    }
+    .card.single-screen:hover::before { opacity: 0.3; animation: confetti-float 3s linear infinite; }
+    .card.single-screen .badge {
+      border-radius: 50px;
+      color: var(--single-accent, #ff0055);
+      border: 1px solid var(--single-accent, #ff0055);
+    }
+    .card.single-screen:hover .theater-name { color: var(--single-accent, #ff0055); }
+
+    .card.single-screen.theme-classic-red    { --single-accent: #ff0055; --single-glow: rgba(255, 0, 85, 0.2); }
+    .card.single-screen.theme-classic-amber  { --single-accent: #ffaa00; --single-glow: rgba(255, 170, 0, 0.2); }
+    .card.single-screen.theme-classic-violet { --single-accent: #d946ef; --single-glow: rgba(217, 70, 239, 0.2); }
+    .card.single-screen.theme-bramarambha  { --single-accent: #ff0033; --single-glow: rgba(255, 0, 51, 0.2); }
+    .card.single-screen.theme-mallikarjuna { --single-accent: #ff7700; --single-glow: rgba(255, 119, 0, 0.2); }
+    .card.single-screen.theme-saisiram     { --single-accent: #ffcc00; --single-glow: rgba(255, 204, 0, 0.2); }
+    .card.single-screen.theme-devi         { --single-accent: #ff0077; --single-glow: rgba(255, 0, 119, 0.2); }
+    .card.single-screen.theme-bhujanga     { --single-accent: #00ff66; --single-glow: rgba(0, 255, 102, 0.2); }
+    .card.single-screen.theme-gokul        { --single-accent: #00e5ff; --single-glow: rgba(0, 229, 255, 0.2); }
+     .card.single-screen.theme-sairanga    { --single-accent: #ffcc00; --single-glow: rgba(255, 204, 0, 0.2); }
+
+    /* Single Screen Layout Containers */
+    .single-screen-scroll-container {
+      display: flex;
+      gap: 1.5rem;
+      overflow-x: auto;
+      padding-bottom: 1rem;
+      scroll-snap-type: x mandatory;
+      margin-bottom: 3rem;
+    }
+    .single-screen-column {
+      display: grid;
+      grid-template-rows: repeat(3, auto);
+      gap: 1.5rem;
+      min-width: 310px;
+      max-width: 320px;
+      flex-shrink: 0;
+      scroll-snap-align: start;
+    }
+
+    
+
+    /* =========================================================
+       5. WATCHLIST & POSTER CARDS
+       ========================================================= */
+    .poster-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1.8rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .movie-card {
+      background: var(--card-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      overflow: hidden;
+      backdrop-filter: blur(12px);
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .movie-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(255, 255, 255, 0.3);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+    }
+
+    .poster-wrapper {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 2 / 3;
+      background: #12131a;
+      overflow: hidden;
+    }
+
+    .poster-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s ease;
+    }
+
+    .movie-card:hover .poster-img {
+      transform: scale(1.05);
+    }
+
+    .format-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(0, 0, 0, 0.75);
+      border: 1px solid var(--accent-gold);
+      color: var(--accent-gold);
+      font-size: 0.65rem;
+      font-weight: 800;
+      padding: 0.25rem 0.5rem;
+      border-radius: 6px;
+      letter-spacing: 1px;
+      backdrop-filter: blur(4px);
+    }
+
+    .movie-info {
+      padding: 1.2rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      flex-grow: 1;
+      gap: 0.8rem;
+    }
+
+    .movie-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      line-height: 1.3;
+      color: var(--text-main);
+    }
+
+    .release-date {
+      font-size: 0.8rem;
+      color: var(--accent-gold);
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.4rem;
+    }
+
+    .btn-action {
+      flex: 1;
+      text-align: center;
+      padding: 0.6rem 0.4rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-decoration: none;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      transition: background 0.2s ease;
+    }
+
+    .btn-action:hover {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+
+  </style>
+</head>
+<body>
+
+  
+
+    
+      <header>
+        <h1>Cinephile Hub</h1>
+        <p>Direct access to premium screen formats without ads or clutter.</p>
+      </header>
+
+      <h2 class="section-title">PLF & IMAX Screens</h2>
+      
+      <div class="grid">
+        
+        <!-- Card 1: IMAX Theme -->
+        <div class="card theme-imax">
+         <div>
+           <div class="card-header">
+              <span class="theater-name">PVR Inox Forum</span>
+              <span class="badge imax">4DX</span>
+            </div>
+            <p class="location">Kukatpally, Hyderabad</p>
+          </div>
+          <a href="https://in.bookmyshow.com/cinemas/hyderabad/pvr-nexus-mall-kukatpally-hyderabad/buytickets/PVFS/20260726" target="_blank" class="book-btn">Book Tickets &rarr;</a>
+        </div>
+
+        <!-- Card 2: PCX Theme -->
+        <div class="card theme-pcx">
+         <div>
+         
+            <div class="card-header">
+              <span class="theater-name">Prasads Multiplex</span>
+              <span class="badge">HDR BY BARCO/ PCX</span>
+            </div>
+            <p class="location">Necklace Road, Hyderabad</p>
+          </div>
+          <a href="https://in.bookmyshow.com/cinemas/hyderabad/prasads-multiplex-hyderabad/buytickets/PRHN/20260726" target="_blank" class="book-btn">Book Tickets &rarr;</a>
+        </div>
+
+        <!-- Card 3: Dolby Theme -->
+        <div class="card theme-dolby">
+         <div>
+         
+            <div class="card-header">
+              <span class="theater-name">AMB Cinemas</span>
+              <span class="badge">HDR BY BARCO 
+              </span>
+            </div>
+            <p class="location">Gachibowli, Hyderabad</p>
+          </div>
+          <a href="https://in.bookmyshow.com/cinemas/hyderabad/amb-cinemas-gachibowli/buytickets/AMBH/20260726" target="_blank" class="book-btn">Book Tickets &rarr;</a>
+        </div>
+
+        <!-- Card 4: Dolby Cinema Theme -->
+        <div class="card theme-dolby-cinema">
+         <div>
+           <div class="card-header">
+              <span class="theater-name">ALLU Cinemas</span>
+              <span class="badge">DOLBY CINEMA</span>
+            </div>
+            <p class="location">Kokapet, Hyderabad</p>
+          </div>
+          <a href="https://in.bookmyshow.com/cinemas/hyderabad/allu-cinemas-kokapet/buytickets/ALUC/20260726" target="_blank" class="book-btn">Book Tickets &rarr;</a>
+        </div>
+
+        <!-- Card 5: Macro-XE Theme -->
+        <div class="card theme-cinepolis">
+         <div>
+         
+            <div class="card-header">
+              <span class="theater-name">CINEPOLIS</span>
+              <span class="badge">MACRO XE</span>
+            </div>
+            <p class="location">Suchitra, Hyderabad</p>
+          </div>
+          <a href="https://in.bookmyshow.com/cinemas/hyd/cinepolis-tnr-north-city-suchitra-hyderabad/buytickets/CTNR/20260726" target="_blank" class="book-btn">Book Tickets &rarr;</a>
+        </div>
+
+        <!-- Card 6: EPIQ Theme -->
+        <div class="card theme-epiq">
+          <div>
+             <div class="card-header">
+              <span class="theater-name">ART Cinemas</span>
+              <span class="badge">EPIQ</span>
+            </div>
+            <p class="location">Vanastalipuram, Hyderabad</p>
+          </div>
+          <a href="https://in.bookmyshow.com/cinemas/hyderabad/art-cinemas-vanasthalipuram/buytickets/ACEV/20260726" target="_blank" class="book-btn">Book Tickets &rarr;</a>
+        </div>
+
+        <!-- Card 7: Luxon LED Theme -->
+        <div class="card theme-aaa">
+          <div>
+            
+            <div class="card-header">
+              <span class="theater-name">AAA Cinemas</span>
+              <span class="badge">EPIQ Luxon LED</span>
+            </div>
+            <p class="location">Ameerpet, Hyderabad</p>
+          </div>
+          <a href="https://in.bookmyshow.com/cinemas/hyderabad/aaa-cinemas-ameerpet/buytickets/ACAS/20260726" target="_blank" class="book-btn">Book Tickets &rarr;</a>
+        </div>
+      </div>
+   
+    </div>
+
+<h2 class="section-title">UPCOMING PLF Screens</h2>
+
+   <div class="grid">
+         <!-- Card 1: IMAX Theme -->
+        <div class="card theme-imax">
+          <div>
+            <div class="card-header">
+              <span class="theater-name">AMB CLASSIC VICTORY</span>
+              <span class="badge imax">IMAX With Laser</span>
+            </div>
+            <p class="location">RtcxRoads, Hyderabad</p>
+          </div>
+          <a href=" " target="_blank" class="book-btn">Book Tickets &rarr;</a>
+        </div>
+        
+      
+        <!-- Card 2:Dolby Cinema  Theme -->
+        <div class="card theme-dolby-cinema">
+          <div>
+            <div class="card-header">
+              <span class="theater-name">MYTHRI RANGA</span>
+              <span class="badge imax">DOLBY CINEMA</span>
+            </div>
+            <p class="location">Jeedimetla, Hyderabad</p>
+          </div>
+          <a href="" target="_blank" class="book-btn">Book Tickets &rarr;</a>
+        </div>
+</div>
+<style>
+/* Universal fix to ensure padding doesn't inflate element widths */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* Horizontal scroll container */
+.grid1 {
+  display: grid;
+  grid-template-rows: repeat(3, 1fr);
+  /* Exactly 3 columns per view (accounting for two 16px gaps = 32px total) */
+  grid-auto-columns: calc((100% - 32px) / 3);
+  grid-auto-flow: column;
+  gap: 16px;
+  
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 12px 4px;
+  width: 100%;
+  
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+}
+
+/* Fix grid card stretching */
+.grid1 .card {
+  /* CRITICAL: Overrides grid item auto-expanding behavior */
+  min-width: 0; 
+  width: 100%;
+  
+  scroll-snap-align: start;
+  
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Prevent internal long text from pushing the card wider */
+.grid1 .card .theater-name,
+.grid .card .location {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* Mobile responsiveness: switch to 1 card width or custom sizes on smaller screens */
+@media (max-width: 768px) {
+  .grid1 {
+    /* Show ~1.2 cards visible at a time on mobile screens */
+    grid-auto-columns: 85%; 
+  }
+}
+
+/* Scrollbar styling */
+.grid1::-webkit-scrollbar {
+  height: 8px;
+}
+
+.grid1::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+
+.grid1::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.grid::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}</style>
+
+      <!-- SINGLE SCREEN THEATERS SECTION -->
+      <h2 class="section-title single-screens">Iconic Single Screens</h2>
+      
+      <div class="grid1">
+         
+       
+        <div class="card single-screen theme-classic-amber">
+          <div>
+            <div class="card-header">
+              <span class="theater-name">Sudarshan 35mm</span>
+              <span class="badge">4K DOLBY ATMOS</span>
+            </div>
+            <p class="location">RTC X Roads, Hyderabad</p>
+          </div>
+          <a href="https://in.bookmyshow.com/cinemas/hyd/sudarshan-35mm-4k-laser-dolby-atmos-rtc-x-roads/buytickets/SUDA/20260802" target="_blank" class="book-btn">Book Tickets &rarr;</a>
+        </div>
+
+        <div class="card single-screen theme-classic-red">
+          <div>
+            <div class="card-header">
+              <span class="theater-name">Sandhya 70mm</span>
+              <span class="badge">4K LASER</span>
+            </div>
+            <p class="location">RTC X Roads, Hyderabad</p>
+          </div>
+          <a href="https://in.bookmyshow.com/cinemas/hyderabad/sandhya-70mm-4k-dolby-atmos-rtc-x-roads/buytickets/SMMR/20260802" target="_blank" class="book-btn">Book Tickets &rarr;</a>
+        </div>
+
+        <div class="card single-screen theme-classic-violet">
+          <div>
+            <div class="card-header">
+              <span class="theater-name">Vimal 70mm</span>
+              <span class="badge">70MM / ATMOS</span>
+            </div>
+            <p class="location">Balanagar, Hyderabad</p>
+          </div>
+          <a href="https://www.district.in/movies/mythri-theatres-vimal-70mm-ac-4k-laser-dolby-atmos-balanagar-newly-renovated-hyderabad-in-hyderabad-CD1039848" target="_blank" class="book-btn">Book Tickets &rarr;</a>
+        </div>
+
+        <div class="card single-screen theme-bramarambha">
+          <div>
+            <div class="card-header">
+              <span class="theater-name">Bramarambha 70mm</span>
+              <span class="badge">4K DOLBY ATMOS</span>
+            </div>
+            <p class="location">Kukatpally, Hyderabad</p>
+          </div>
+          <a href="https://in.bookmyshow.com/cinemas/hyd/bhramaramba-70mm-a-c-4k-dolby-kukatpally/buytickets/BRKH/20260802" target="_blank" class="book-btn">Book Tickets &rarr;</a>
+        </div>
+
+        <div class="card single-screen theme-mallikarjuna">
+          <div>
+            <div class="card-header">
+              <span class="theater-name">Mallikarjuna 70mm</span>
+              <span class="badge">4K LASER / ATMOS</span>
+            </div>
+            <p class="location">Kukatpally, Hyderabad</p>
+          </div>
+          <a href="https://in.bookmyshow.com/cinemas/hyderabad/mallikarjuna-70mm-a-c-dts-kukatpally/buytickets/MAHM/20260802" target="_blank" class="book-btn">Book Tickets &rarr;</a>
+        </div>
+
+        <div class="card single-screen theme-saisiram">
+          <div>
+            <div class="card-header">
+              <span class="theater-name">Sri Sai Ram Theater</span>
+              <span class="badge">4K DIGITAL</span>
+            </div>
+            <p class="location">Malkajgiri, Hyderabad</p>
+          </div>
+          <a href="https://in.bookmyshow.com/cinemas/hyderabad/sri-sai-ram-70mm-a-c-4k-laser-dolby-71malkajgiri/buytickets/SSRM/20260801" target="_blank" class="book-btn">Book Tickets &rarr;</a>
+        </div>
+
+        <div class="card single-screen theme-devi">
+          <div>
+            <div class="card-header">
+              <span class="theater-name">Devi 70mm</span>
+              <span class="badge">4K LASER / ATMOS</span>
+            </div>
+            <p class="location">RTC X Roads, Hyderabad</p>
+          </div>
+          <a href="https://in.bookmyshow.com/cinemas/hyderabad/devi-70mm-4k-laser-dolby-atmos-rtc-x-roads/buytickets/DVRR/20260801" target="_blank" class="book-btn">Book Tickets &rarr;</a>
+        </div>
+
+        <div class="card single-screen theme-bhujanga">
+          <div>
+            <div class="card-header">
+              <span class="theater-name">Bhujanga Theatre</span>
+              <span class="badge">2k ATMOS</span>
+            </div>
+            <p class="location">Jeedimetla, Hyderabad</p>
+          </div>
+          <a href="https://in.bookmyshow.com/cinemas/hyd/bhujanga-70mm-jeedimetla/buytickets/BJNG/20260802" target="_blank" class="book-btn">Book Tickets &rarr;</a>
+        </div>
+
+        <div class="card single-screen theme-gokul">
+          <div>
+            <div class="card-header">
+              <span class="theater-name">Mukund 70mm</span>
+              <span class="badge">2k ATMOS</span>
+            </div>
+            <p class="location">Medchal, Hyderabad</p>
+          </div>
+          <a href="https://in.bookmyshow.com/cinemas/hyderabad/asian-mukund-cinema-medchal/buytickets/AMCM/20260817" target="_blank" class="book-btn">Book Tickets &rarr;</a>
+        </div>
+
+<div class="card single-screen theme-sairanga">
+          <div>
+            <div class="card-header">
+              <span class="theater-name">Sai Ranga 70mm</span>
+              <span class="badge">4K/Dolby7.1</span>
+            </div>
+            <p class="location">Miyapur, Hyderabad</p>
+          </div>
+          <a href="https://in.bookmyshow.com/cinemas/hyderabad/sai-ranga70mm-4klaser-dolby71-aircooled-miyapur/buytickets/SRCM/20260911" target="_blank" class="book-btn">Book Tickets &rarr;</a>
+        </div>
+
+      </div>
+    </section>
+    </div>
+
+      <header style="margin-top: 4rem;">
+        <h1>2026 Cinema Watchlist</h1>
+        <p>Track anticipated theatrical releases to catch on the big screen</p>
+      </header>
+
+      <div class="poster-grid">
+        <div class="movie-card">
+          <div class="poster-wrapper">
+            <span class="format-badge">IMAX 3D</span>
+            <img class="poster-img" src="marvel.jpg" alt="spiderman brand new day Poster">
+          </div>
+          <div class="movie-info">
+            <div>
+              <h2 class="movie-title">Spider-man: BRAND NEW DAY</h2>
+              <p class="release-date">RELEASE: 30th July 2026</p>
+            </div>
+            <div class="card-actions">
+              <a href="https://youtu.be/daXaTug8rL4?si=DJ60iRAWMVP5cRM7" class="btn-action">TRAILER</a>
+              <a href="#" class="btn-action">REMIND</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="movie-card">
+          <div class="poster-wrapper">
+            <span class="format-badge">DOLBY CINEMA</span>
+            <img class="poster-img" src="example.jpg" alt="Fauzi poster">
+          </div>
+          <div class="movie-info">
+            <div>
+              <h2 class="movie-title">FAUZI</h2>
+              <p class="release-date">RELEASE: 3rd December 2026</p>
+            </div>
+            <div class="card-actions">
+              <a href="#" class="btn-action">TRAILER</a>
+              <a href="#" class="btn-action">REMIND</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="movie-card">
+          <div class="poster-wrapper">
+            <span class="format-badge">MACRO XE</span>
+            <img class="poster-img" src="toxic.jpg" alt="Toxic Poster">
+          </div>
+          <div class="movie-info">
+            <div>
+              <h2 class="movie-title">TOXIC: A Fairy Tale for Grown Ups</h2>
+              <p class="release-date">RELEASE: 26th August 2026</p>
+            </div>
+            <div class="card-actions">
+              <a href="#" class="btn-action">TRAILER</a>
+              <a href="#" class="btn-action">REMIND</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="movie-card">
+          <div class="poster-wrapper">
+            <span class="format-badge">2D</span>
+            <img class="poster-img" src="paradise.jpg" alt="the paradise Poster">
+          </div>
+          <div class="movie-info">
+            <div>
+              <h2 class="movie-title">THE PARADISE</h2>
+              <p class="release-date">RELEASE: October 2026</p>
+            </div>
+            <div class="card-actions">
+              <a href="#" class="btn-action">TRAILER</a>
+              <a href="#" class="btn-action">REMIND</a>
+            </div>
+          </div>
+        </div>
+<!-- Movie Card 5 -->
+<div class="movie-card">
+  <div class="poster-wrapper">
+    <span class="format-badge">2D</span>
+    <img class="poster-img" src="sardar.jpg" alt="Sardar Poster">
+  </div>
+  <div class="movie-info">
+    <div>
+      <h2 class="movie-title">SARDAR2</h2>
+      <p class="release-date">RELEASE: 10th September 2026</p>
+    </div>
+    <div class="card-actions">
+      <a href="#" class="btn-action">TRAILER</a>
+      <a href="#" class="btn-action">REMIND</a>
+    </div>
+  </div>
+</div>
+
+<!-- Movie Card 6 -->
+<div class="movie-card">
+  <div class="poster-wrapper">
+    <span class="format-badge">2D</span>
+    <img class="poster-img" src="demonte3.jpg" alt="the demonte colony 3 Poster">
+  </div>
+  <div class="movie-info">
+    <div>
+      <h2 class="movie-title">DEMONTE COLONY 3</h2>
+      <p class="release-date">RELEASE: 1st october 2026</p>
+    </div>
+    <div class="card-actions">
+      <a href="#" class="btn-action">TRAILER</a>
+      <a href="#" class="btn-action">REMIND</a>
+    </div>
+  </div>
+</div>
+
+<!-- Movie Card 7 -->
+<div class="movie-card">
+  <div class="poster-wrapper">
+    <span class="format-badge">PCX</span>
+    <img class="poster-img" src="endgame.jpg" alt="the endgame Poster">
+  </div>
+  <div class="movie-info">
+    <div>
+      <h2 class="movie-title">AVENGERS: ENDGAME</h2>
+      <p class="release-date">RERELEASE: 25th September 2026</p>
+    </div>
+    <div class="card-actions">
+      <a href="#" class="btn-action">TRAILER</a>
+      <a href="#" class="btn-action">REMIND</a>
+    </div>
+  </div>
+</div>
+
+<!-- Movie Card 8 -->
+<div class="movie-card">
+  <div class="poster-wrapper">
+    <span class="format-badge">2D</span>
+    <img class="poster-img" src="https://assets.gadgets360cdn.com/pricee/assets/product/202606/Irumudi_p1_1780571734.jpg" alt="the irumudi Poster">
+  </div>
+  <div class="movie-info">
+    <div>
+      <h2 class="movie-title">IRUMUDI</h2>
+      <p class="release-date">RELEASE: 21st August 2026</p>
+    </div>
+    <div class="card-actions">
+      <a href="#" class="btn-action">TRAILER</a>
+      <a href="#" class="btn-action">REMIND</a>
+    </div>
+  </div>
+</div>
+
+<!-- Movie Card 9 -->
+<div class="movie-card">
+  <div class="poster-wrapper">
+    <span class="format-badge">2D</span>
+    <img class="poster-img" src="https://cdn.bollywoodmdb.com/fit-in/movies/largethumb/400x600/2022/spirit/spirit-1767789265.jpg" alt="the spirit Poster">
+  </div>
+  <div class="movie-info">
+    <div>
+      <h2 class="movie-title">SPIRIT</h2>
+      <p class="release-date">RELEASE: 5th March 2027</p>
+    </div>
+    <div class="card-actions">
+      <a href="#" class="btn-action">TRAILER</a>
+      <a href="#" class="btn-action">REMIND</a>
+    </div>
+  </div>
+</div>
+
+<!-- Movie Card 10 -->
+<div class="movie-card">
+  <div class="poster-wrapper">
+    <span class="format-badge">IMAX</span>
+    <img class="poster-img" src="https://cdn.mos.cms.futurecdn.net/jr8KPBacX66akHoHUW8ApN.jpg" alt="the varanasi Poster">
+  </div>
+  <div class="movie-info">
+    <div>
+      <h2 class="movie-title">VARANASI</h2>
+      <p class="release-date">RELEASE: 7th April 2026</p>
+    </div>
+    <div class="card-actions">
+      <a href="#" class="btn-action">TRAILER</a>
+      <a href="#" class="btn-action">REMIND</a>
+    </div>
+  </div>
+</div>
+
+<!-- Movie Card 11 -->
+<div class="movie-card">
+  <div class="poster-wrapper">
+    <span class="format-badge">PCX</span>
+    <img class="poster-img" src="https://media.senscritique.com/media/000023669911/0/ramayana_part_one.jpg" alt="the ramayana Poster">
+  </div>
+  <div class="movie-info">
+    <div>
+      <h2 class="movie-title">RAMAYANA</h2>
+      <p class="release-date">RELEASE: 6th November 2026</p>
+    </div>
+    <div class="card-actions">
+      <a href="#" class="btn-action">TRAILER</a>
+      <a href="#" class="btn-action">REMIND</a>
+    </div>
+  </div>
+</div>
+
+      </div>
+    </main>
+  </div>
+
+</body>
+</html>
+

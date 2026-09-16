@@ -1,0 +1,289 @@
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Clash+Display:wght@600;700&family=Unbounded:wght@400;600;800&family=Space+Grotesk:wght@400;500&display=swap');
+ 
+  :root{
+    --v1:#ff2e63;
+    --v2:#ff9f1c;
+    --v3:#2ec4b6;
+    --v4:#7b2ff7;
+    --ink:#0a0710;
+  }
+ 
+  *{margin:0;padding:0;box-sizing:border-box;}
+ 
+  html,body{
+    height:100%;
+    background:var(--ink);
+    font-family:'Space Grotesk',sans-serif;
+    overflow:hidden;
+  }
+ 
+  /* ---------- Layer 1: the colorful world underneath ---------- */
+  .world{
+    position:fixed;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    background:
+      radial-gradient(circle at 20% 20%, var(--v4) 0%, transparent 45%),
+      radial-gradient(circle at 85% 15%, var(--v1) 0%, transparent 40%),
+      radial-gradient(circle at 75% 85%, var(--v3) 0%, transparent 45%),
+      radial-gradient(circle at 15% 80%, var(--v2) 0%, transparent 40%),
+      var(--ink);
+  }
+ 
+  .world-inner{
+    max-width:40rem;
+    padding:2rem;
+    opacity:0;
+    transform:scale(0.92) translateY(10px);
+    transition:opacity 0.7s ease, transform 0.8s cubic-bezier(0.16,1,0.3,1);
+  }
+ 
+  .world-inner.show{
+    opacity:1;
+    transform:scale(1) translateY(0);
+  }
+ 
+  .tag{
+    font-size:0.8rem;
+    letter-spacing:0.4em;
+    text-transform:uppercase;
+    color:var(--v3);
+    font-weight:600;
+    margin-bottom:1.4rem;
+    display:block;
+  }
+ 
+  h1{
+    font-family:'Unbounded',sans-serif;
+    font-weight:800;
+    font-size:clamp(2.6rem,8vw,5rem);
+    line-height:1.02;
+    color:#fff;
+    letter-spacing:-0.02em;
+  }
+ 
+  h1 span{
+    background:linear-gradient(90deg,var(--v1),var(--v2),var(--v3));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+ 
+  p{
+    margin-top:1.4rem;
+    font-size:1.1rem;
+    color:rgba(255,255,255,0.7);
+    line-height:1.6;
+  }
+ 
+  .go{
+    margin-top:2.2rem;
+    display:inline-block;
+    padding:0.9rem 2.2rem;
+    border-radius:100px;
+    background:#fff;
+    color:var(--ink);
+    font-weight:700;
+    font-size:1rem;
+    border:none;
+    cursor:pointer;
+  }
+ 
+  /* ---------- Layer 2: the shattering glass pane ---------- */
+  .glass-layer{
+    position:fixed;
+    inset:0;
+    z-index:5;
+    background:#0d0b14;
+  }
+ 
+  .shard{
+    position:absolute;
+    background:#0d0b14;
+    background-image:
+      linear-gradient(135deg, rgba(255,255,255,0.03) 0%, transparent 40%),
+      linear-gradient(315deg, rgba(255,255,255,0.02) 0%, transparent 50%);
+    border:1px solid rgba(255,255,255,0.04);
+    will-change:transform, opacity;
+    transition:transform 0.9s cubic-bezier(0.22,1,0.36,1), opacity 0.7s ease;
+  }
+ 
+  .prompt{
+    position:absolute;
+    inset:0;
+    z-index:6;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    pointer-events:none;
+    transition:opacity 0.5s ease;
+  }
+ 
+  .prompt.hide{
+    opacity:0;
+  }
+ 
+  .prompt-ring{
+    width:120px;
+    height:120px;
+    border-radius:50%;
+    border:1.5px solid rgba(255,255,255,0.25);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    pointer-events:auto;
+    position:relative;
+    transition:transform 0.25s ease, border-color 0.25s ease;
+  }
+ 
+  .prompt-ring:hover{
+    transform:scale(1.06);
+    border-color:rgba(255,255,255,0.6);
+  }
+ 
+  .prompt-ring::before{
+    content:'';
+    position:absolute;
+    inset:-10px;
+    border-radius:50%;
+    border:1px solid rgba(255,255,255,0.1);
+    animation:pulse 2.6s ease-out infinite;
+  }
+ 
+  @keyframes pulse{
+    0%{transform:scale(1); opacity:0.7;}
+    100%{transform:scale(1.5); opacity:0;}
+  }
+ 
+  .prompt-ring span{
+    font-family:'Unbounded',sans-serif;
+    font-size:0.7rem;
+    letter-spacing:0.15em;
+    text-transform:uppercase;
+    color:#fff;
+    font-weight:600;
+  }
+ 
+  .prompt-label{
+    margin-top:1.6rem;
+    color:rgba(255,255,255,0.4);
+    font-size:0.85rem;
+    letter-spacing:0.08em;
+  }
+ 
+  @media (prefers-reduced-motion: reduce){
+    .prompt-ring::before{animation:none;}
+  }
+</style>
+</head>
+<body>
+ 
+ 
+  <div class="glass-layer" id="glassLayer"></div>
+ 
+  <div class="prompt" id="prompt">
+    <div class="prompt-ring" id="clickTarget">
+      <span>Click</span>
+    </div>
+    <div class="prompt-label">to break in</div>
+  </div>
+ 
+  <script>
+    const glassLayer = document.getElementById('glassLayer');
+    const clickTarget = document.getElementById('clickTarget');
+    const prompt = document.getElementById('prompt');
+    const worldInner = document.getElementById('worldInner');
+ 
+    const COLS = 12;
+    const ROWS = 8;
+    const shards = [];
+ 
+    function buildShards() {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      const cw = w / COLS;
+      const ch = h / ROWS;
+ 
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          const shard = document.createElement('div');
+          shard.className = 'shard';
+          // slight random jitter to each shard's cell boundaries for an organic crack look
+          const jx = (Math.random() - 0.5) * cw * 0.15;
+          const jy = (Math.random() - 0.5) * ch * 0.15;
+          const left = c * cw + jx;
+          const top = r * ch + jy;
+          shard.style.left = left + 'px';
+          shard.style.top = top + 'px';
+          shard.style.width = cw + 1 + 'px';
+          shard.style.height = ch + 1 + 'px';
+          glassLayer.appendChild(shard);
+          shards.push({ el: shard, cx: left + cw / 2, cy: top + ch / 2 });
+        }
+      }
+    }
+ 
+    buildShards();
+ 
+    function shatter(originX, originY) {
+      prompt.classList.add('hide');
+ 
+      // sort shards by distance from click point so the break ripples outward
+      const withDist = shards.map(s => {
+        const dx = s.cx - originX;
+        const dy = s.cy - originY;
+        return { ...s, dist: Math.sqrt(dx * dx + dy * dy), dx, dy };
+      }).sort((a, b) => a.dist - b.dist);
+ 
+      const maxDist = Math.max(...withDist.map(s => s.dist)) || 1;
+ 
+      withDist.forEach((s) => {
+        const delay = (s.dist / maxDist) * 260; // ripple timing
+        const angle = Math.atan2(s.dy, s.dx);
+        const force = 500 + Math.random() * 500;
+        const tx = Math.cos(angle) * force;
+        const ty = Math.sin(angle) * force - 120; // slight upward bias, like debris catching air
+        const rot = (Math.random() - 0.5) * 720;
+ 
+        setTimeout(() => {
+          s.el.style.transform = `translate(${tx}px, ${ty}px) rotate(${rot}deg) scale(0.3)`;
+          s.el.style.opacity = '0';
+        }, delay);
+      });
+ 
+      setTimeout(() => {
+        glassLayer.style.pointerEvents = 'none';
+        glassLayer.remove();
+        worldInner.classList.add('show');
+      }, 1200);
+    }
+ 
+    clickTarget.addEventListener('click', (e) => {
+      const rect = clickTarget.getBoundingClientRect();
+      const originX = rect.left + rect.width / 2;
+      const originY = rect.top + rect.height / 2;
+      shatter(originX, originY);
+    });
+ 
+    // also allow clicking anywhere on the glass for the same effect
+    glassLayer.addEventListener('click', (e) => {
+      shatter(e.clientX, e.clientY);
+    });
+ 
+    window.addEventListener('resize', () => {
+      // simple approach: just reload shard positions if still intact
+      if (document.body.contains(glassLayer)) {
+        glassLayer.innerHTML = '';
+        shards.length = 0;
+        buildShards();
+      }
+    });
+  </script>
+ 
