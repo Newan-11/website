@@ -174,34 +174,68 @@ div.scrollmenu  {
       margin-bottom: 3rem;
     }
 
-      .card {
+     /* Base Card Shadow Update */
+.card {
+  position: relative;
+  background: rgba(18, 20, 29, 0.65);
+  backdrop-filter: blur(12px);
+  border-radius: 16px;
+  padding: 1.6rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  animation: cardReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
 
-      position: relative;
+  /* Default Rest State Shadow */
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5),
+              0 0 15px rgba(255, 255, 255, 0.02);
+}
 
-      background: rgba(18, 20, 29, 0.65);
+/* Base Hover Shadow Elevation */
+.card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.8),
+              0 0 25px rgba(255, 255, 255, 0.05);
+}
 
-      backdrop-filter: blur(12px);
+/* Theme Accent-Matched Shadows on Hover */
+.card.theme-imax:hover {
+  box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.8),
+              0 0 25px var(--gold-glow);
+}
 
-      border-radius: 16px;
+.card.theme-pcx:hover {
+  box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.8),
+              0 0 25px var(--red-glow);
+}
 
-      padding: 1.6rem;
+.card.theme-dolby:hover {
+  box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.8),
+              0 0 25px var(--blue-glow);
+}
 
-      border: 1px solid rgba(255, 255, 255, 0.08);
+.card.theme-dolby-cinema:hover {
+  box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.8),
+              0 0 25px rgba(37, 99, 235, 0.4);
+}
 
-      transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+.card.theme-cinepolis:hover {
+  box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.8),
+              0 0 25px rgba(107, 186, 239, 0.35);
+}
 
-      display: flex;
+.card.theme-epiq:hover {
+  box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.8),
+              0 0 25px rgba(0, 255, 102, 0.35);
+}
 
-      flex-direction: column;
-
-      justify-content: space-between;
-
-      overflow: hidden;
-
-      animation: cardReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
-
-    }
-
+.card.theme-aaa:hover {
+  box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.8),
+              0 0 25px rgba(176, 38, 255, 0.35);
+}
 
     .card::before {
       content: '';
