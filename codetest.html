@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cinephile Hub — Aspect Ratio & Framing Simulator</title>
+  <style>
+    :root {
+      --bg: #070709;
+      --panel: #111115;
+      --border: rgba(255, 255, 255, 0.12);
+      --text: #f4f4f5;
+      --muted: #8e8e93;
+      --accent: #d4af37;
+      --danger: #ef4444;
+      --success: #10b981;
+      --font-mono: "SFMono-Regular", Consolas, "Courier New", monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Diagnostics Bar */
+    header {
+      padding: 1.2rem 2rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(17, 17, 21, 0.8);
+      backdrop-filter: blur(10px);
+    }
+
+    .brand {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .status-tag {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    /* Workspace Layout */
+    .app-container {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      flex-grow: 1;
+      height: calc(100vh - 58px);
+    }
+
+    @media (max-width: 900px) {
+      .app-container {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
+        height: auto;
+      }
+    }
+
+    /* Controls Panel */
+    .controls {
+      background: var(--panel);
+      border-right: 1px solid var(--border);
+      padding: 1.8rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.8rem;
+      overflow-y: auto;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    label {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    select {
+      width: 100%;
+      background: #18181c;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.75rem 1rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    select:focus {
+      border-color: var(--accent);
+    }
+
+    .spec-readout {
+      background: #18181c;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .spec-item {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+    }
+
+    .spec-item .val {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    /* Optical Projection Viewport */
+    .viewport {
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at center, #121217 0%, #050507 100%);
+      position: relative;
+    }
+
+    .stage {
+      width: 100%;
+      max-width: 900px;
+      height: 520px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px dashed rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+    }
+
+    /* Physical Screen Surface */
+    .screen-surface {
+      background: #1c1c22;
+      border: 2px solid #3f3f46;
+      box-shadow: 0 0 50px rgba(0,0,0,0.9);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* Projected Picture Canvas */
+    .projected-frame {
+      background: radial-gradient(circle, #38bdf8 0%, #0369a1 100%);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      box-shadow: 0 0 30px rgba(56, 189, 248, 0.25);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .frame-label {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #ffffff;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+      pointer-events: none;
+      text-align: center;
+    }
+
+    /* Legend / Overlay Metrics */
+    .metrics-bar {
+      position: absolute;
+      bottom: 1.5rem;
+      display: flex;
+      gap: 2rem;
+      background: rgba(17, 17, 21, 0.85);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      padding: 0.8rem 1.5rem;
+      border-radius: 30px;
+    }
+
+    .metric-chip {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .dot.screen { background: #3f3f46; }
+    .dot.picture { background: #38bdf8; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">Cinephile Hub // Framing Diagnostics</div>
+    <div class="status-tag">Real-Time Optical Projection Engine</div>
+  </header>
+
+  <div class="app-container">
+    <!-- CONTROLS SIDEBAR -->
+    <div class="controls">
+      
+      <div class="control-group">
+        <label for="filmSelect">1. Select Film / Source Aspect Ratio</label>
+        <select id="filmSelect">
+          <option value="1.43" data-name="Ramayana: Part One (IMAX Cut)">Ramayana: Part One — 1.43:1 (Full Height)</option>
+          <option value="1.90" data-name="Spider-Man: Brand New Day">Spider-Man: Brand New Day — 1.90:1 (Digital IMAX)</option>
+          <option value="2.39" data-name="Toxic: A Fairy Tale" selected>Toxic: A Fairy Tale — 2.39:1 (Scope)</option>
+          <option value="1.85" data-name="Classic Flat Release">Classic Flat — 1.85:1 (Widescreen)</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label for="venueSelect">2. Select Auditorium / Screen Geometry</label>
+        <select id="venueSelect">
+          <option value="1.43" data-name="Prasads Multiplex (Large Canvas)" data-tech="Barco Dual Laser">Prasads Screen 6 — 1.43:1 Native Aspect</option>
+          <option value="1.90" data-name="PVR Forum Kukatpally (4DX)" data-tech="4K Laser">PVR Forum Screen 3 — 1.90:1 Aspect</option>
+          <option value="2.39" data-name="Sudarshan 35mm (RTC X Roads)" data-tech="4K RGB Laser / Scope Screen">Sudarshan 35mm — 2.39:1 Scope Native</option>
+          <option value="1.85" data-name="AMB Cinemas (Screen 1)" data-tech="Dolby Atmos / Flat Screen">AMB Cinemas — 1.85:1 Flat Native</option>
+          <option value="1.85" data-name="ALLU Cinemas (Screen 1)" data-tech="	Dual Dolby Vision 4K Laser, 64-Channel Dolby Atmos">ALLU Cinemas — 1.85:1 Flat Native</option>
+          <option value="2.39" data-name="CINEPOLIS (Screen 7)" data-tech=" paired with fully immersive Dolby Atmos audio systems">CINEPOLIS — 2.39:1 Scope Native</option>
+          <option value="1.89" data-name="ART Cinemas (Screen 6)" data-tech="	Barco SP4K-55B RGB Laser, Dolby Atmos (MAG Speakers)">ART Cinemas — 1.89:1 Flat Native</option>
+          <option value="1.89" data-name="AAA Cinemas (Screen 2)" data-tech="	Dolby Atmos (SLS) / Flat Screen">AAA Cinemas — 1.89:1 Flat Native</option>
+        </select>
+      </div>
+
+      <div class="spec-readout">
+        <div class="spec-item">
+          <span>Projection Tech:</span>
+          <span class="val" id="techVal">4K RGB Laser</span>
+        </div>
+        <div class="spec-item">
+          <span>Canvas Fill Efficiency:</span>
+          <span class="val" id="fillVal">100%</span>
+        </div>
+        <div class="spec-item">
+          <span>Masking / Framing:</span>
+          <span class="val" id="maskVal">Optimal Scope Fill</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- OPTICAL STAGE VIEWPORT -->
+    <div class="viewport">
+      <div class="stage" id="stage">
+        
+        <!-- Physical Screen Boundary -->
+        <div class="screen-surface" id="screenSurface">
+          <!-- Active Light Projection Area -->
+          <div class="projected-frame" id="projectedFrame">
+            <span class="frame-label" id="frameLabel">2.39:1 Picture</span>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="metrics-bar">
+        <div class="metric-chip">
+          <span class="dot screen"></span>
+          <span>Physical Screen Border</span>
+        </div>
+        <div class="metric-chip">
+          <span class="dot picture"></span>
+          <span>Active Projected Picture</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const filmSelect = document.getElementById('filmSelect');
+    const venueSelect = document.getElementById('venueSelect');
+    
+    const stage = document.getElementById('stage');
+    const screenSurface = document.getElementById('screenSurface');
+    const projectedFrame = document.getElementById('projectedFrame');
+    
+    const techVal = document.getElementById('techVal');
+    const fillVal = document.getElementById('fillVal');
+    const maskVal = document.getElementById('maskVal');
+    const frameLabel = document.getElementById('frameLabel');
+
+    function calculateProjection() {
+      const filmRatio = parseFloat(filmSelect.value);
+      const screenRatio = parseFloat(venueSelect.value);
+
+      const selectedVenueOption = venueSelect.options[venueSelect.selectedIndex];
+      techVal.textContent = selectedVenueOption.getAttribute('data-tech');
+
+      // Max stage bounds
+      const stageWidth = stage.clientWidth - 80;
+      const stageHeight = stage.clientHeight - 80;
+
+      // 1. Calculate Physical Screen Dimensions based on screenRatio
+      let screenWidth, screenHeight;
+      if (screenRatio > stageWidth / stageHeight) {
+        screenWidth = stageWidth;
+        screenHeight = stageWidth / screenRatio;
+      } else {
+        screenHeight = stageHeight;
+        screenWidth = stageHeight * screenRatio;
+      }
+
+      screenSurface.style.width = `${screenWidth}px`;
+      screenSurface.style.height = `${screenHeight}px`;
+
+      // 2. Calculate Active Projected Frame within Screen (Fitting filmRatio into screenRatio)
+      let pictureWidth, pictureHeight;
+
+      if (filmRatio > screenRatio) {
+        // Letterboxing (Black bars top/bottom)
+        pictureWidth = screenWidth;
+        pictureHeight = screenWidth / filmRatio;
+      } else {
+        // Pillarboxing (Black bars left/right)
+        pictureHeight = screenHeight;
+        pictureWidth = screenHeight * filmRatio;
+      }
+
+      projectedFrame.style.width = `${pictureWidth}px`;
+      projectedFrame.style.height = `${pictureHeight}px`;
+
+      // 3. Compute Area & Efficiency Metrics
+      const screenArea = screenWidth * screenHeight;
+      const pictureArea = pictureWidth * pictureHeight;
+      const fillPercentage = Math.round((pictureArea / screenArea) * 100);
+
+      fillVal.textContent = `${fillPercentage}%`;
+
+      if (fillPercentage === 100) {
+        maskVal.textContent = "Full Screen Immersion";
+        maskVal.style.color = "var(--success)";
+      } else if (filmRatio > screenRatio) {
+        maskVal.textContent = "Letterboxed (Top/Bottom Bars)";
+        maskVal.style.color = "var(--accent)";
+      } else {
+        maskVal.textContent = "Pillarboxed (Side Bars)";
+        maskVal.style.color = "var(--danger)";
+      }
+
+      const selectedFilmName = filmSelect.options[filmSelect.selectedIndex].getAttribute('data-name');
+      frameLabel.textContent = `${selectedFilmName} (${filmRatio}:1)`;
+    }
+
+    filmSelect.addEventListener('change', calculateProjection);
+    venueSelect.addEventListener('change', calculateProjection);
+    window.addEventListener('resize', calculateProjection);
+
+    // Initial Trigger
+    calculateProjection();
+  </script>
+</body>
+</html>
